@@ -850,19 +850,19 @@ OpenWrap.obj.prototype.big = {
 				var existing = this.getID(aKeys);
 			    var uuid;
 			    var hash;
-			    var ett = (isUndefined(aTime)) ? nowUTC() : aTime;
+			    var ett = (isUnDef(aTime)) ? nowUTC() : aTime;
 			
 			    if (Object.keys(aKeys) <= 0) return;
 			    
 				hash = this.__genHash(aKeys);
-				if(isDefined(existing)) {
+				if(isDef(existing)) {
 					uuid = existing;
 				} else {
 					uuid = genUUID();
 				}
 			
 				this.internalData[uuid] = compress(aColumns);
-			    if (isUndefined(this.internalIndex[hash])) { this.internalIndex[hash] = []; }
+			    if (isUnDef(this.internalIndex[hash])) { this.internalIndex[hash] = []; }
 			
 			    var k;
 			    if (this.compressKeys) {
@@ -881,9 +881,9 @@ OpenWrap.obj.prototype.big = {
 			    	}
 			    }
 			    
-			    if(notfound) {
+			    if (notfound) {
 			    	this.internalIndex[hash].push({"u": uuid, "k": k, "t": ett, "n": nowNano() });
-			    };
+			    }
 			    
 			    return uuid;
 			},
@@ -930,12 +930,15 @@ OpenWrap.obj.prototype.big = {
 			setAll: function(anArrayKeyNames, anArray, aTimestamp) {
 				var parent = this;
 
-				parallel4Array(anArray,
+				anArray.forEach((aValue) => {
+					parent.set(ow.obj.filterKeys(anArrayKeyNames, aValue), aValue, aTimestamp);
+				});
+				/*parallel4Array(anArray,
 					function(aValue) {
 						parent.set(ow.obj.filterKeys(anArrayKeyNames, aValue), aValue, aTimestamp);
 						return aValue;
 					}
-				);
+				);*/
 			},
 		
 			__genHash: function(aKeys) {
