@@ -954,7 +954,7 @@ OpenWrap.ch.prototype.waitForJobs = function(aName, aTimeout) {
 		for(var i in ow.ch.jobs[aName]) {
 			if (isDef(ow.ch.jobs[aName][i])) {
 				//ow.ch.jobs[aName][i].waitForThreads(aTimeout);
-				$doWait(ow.ch.jobs[aName][i]);
+				$doWait(ow.ch.jobs[aName][i], aTimeout);
 			}
 		}
 	//}
@@ -1030,6 +1030,21 @@ OpenWrap.ch.prototype.size = function(aName) {
 	return this.__types[this.channels[aName]].size(aName);
 };
 	
+OpenWrap.ch.prototype.__errorHandle = function(id, e) {
+	try {
+		var d = new Date();
+		$ch("__ch::errors").set({
+			id: id,
+			date: d
+		}, {
+			id: id,
+			date: d,
+			exception: String(e)
+		});
+	} catch(e1) {
+	}
+};
+
 /**
  * <odoc>
  * <key>ow.ch.subscribe(aName, aFunction, onlyFromNowm, anId) : String</key>
@@ -1063,11 +1078,23 @@ OpenWrap.ch.prototype.subscribe = function(aName, aFunction, onlyFromNow, anId) 
 				parent.jobs[aName][anId] = $do(function() {
 					aFunction(aName, "set", aKey, aValue, parent, uuid);
 					return uuid;
+				}).catch((e) => { 
+					ow.ch.__errorHandle({ 
+						chName: aName,
+						op: "set",
+						key: aKey
+					}, e);
 				});
 			} else {
 				parent.jobs[aName][anId].then(function() {
 					aFunction(aName, "set", aKey, aValue, parent, uuid);
 					return uuid;
+				}).catch((e) => { 
+					ow.ch.__errorHandle({ 
+						chName: aName,
+						op: "set",
+						key: aKey
+					}, e);
 				});
 			}			
 		};
@@ -1209,7 +1236,13 @@ OpenWrap.ch.prototype.set = function(aName, aKey, aValue, aTimestamp, aUUID, x) 
 						return ii;
 					};
 				};
-				parent.jobs[aName][_i] = $do(f(_i));
+				parent.jobs[aName][_i] = $do(f(_i)).catch((e) => { 
+					ow.ch.__errorHandle({ 
+						chName: aName,
+						op: "set",
+						key: aKey
+					}, e);
+				});
 			} else {				
 				var f = (ii) => {
 					return () => {
@@ -1217,7 +1250,13 @@ OpenWrap.ch.prototype.set = function(aName, aKey, aValue, aTimestamp, aUUID, x) 
 						return ii;
 					};
 				};
-				parent.jobs[aName][_i].then(f(_i));
+				parent.jobs[aName][_i].then(f(_i)).catch((e) => { 
+					ow.ch.__errorHandle({ 
+						chName: aName,
+						op: "set",
+						key: aKey
+					}, e);
+				});
 			}
 		}
 	}
@@ -1264,12 +1303,18 @@ OpenWrap.ch.prototype.setAll = function(aName, anArrayOfKeys, anArrayOfMapData, 
 		for(var _i in this.subscribers[aName]) {
 			if (isUnDef(parent.jobs[aName][_i])) {
 				var f = (ii) => {
-					return () => {				
+					return () => {			
 						parent.subscribers[aName][ii](aName, "setall", anArrayOfKeys, anArrayOfMapData, parent, aTimestamp, aUUID, x);
 						return ii;
 					};
 				};
-				parent.jobs[aName][_i] = $do(f(_i));
+				parent.jobs[aName][_i] = $do(f(_i)).catch((e) => { 
+					ow.ch.__errorHandle({ 
+						chName: aName,
+						op: "setall",
+						keys: anArrayOfKeys
+					}, e);
+				});
 			} else {				
 				var f = (ii) => {
 					return () => {
@@ -1277,7 +1322,13 @@ OpenWrap.ch.prototype.setAll = function(aName, anArrayOfKeys, anArrayOfMapData, 
 						return ii;
 					};
 				};
-				parent.jobs[aName][_i].then(f(_i));
+				parent.jobs[aName][_i].then(f(_i)).catch((e) => { 
+					ow.ch.__errorHandle({ 
+						chName: aName,
+						op: "setall",
+						keys: anArrayOfKeys
+					}, e);
+				});
 			}
 		}		
 	}
@@ -1354,7 +1405,13 @@ OpenWrap.ch.prototype.getSet = function(aName, aMatch, aKey, aValue, aTimestamp,
 						return ii;
 					};
 				};
-				parent.jobs[aName][_i] = $do(f(_i));
+				parent.jobs[aName][_i] = $do(f(_i)).catch((e) => { 
+					ow.ch.__errorHandle({ 
+						chName: aName,
+						op: "set",
+						key: aKey
+					}, e);
+				});
 			} else {				
 				var f = (ii) => {
 					return () => {
@@ -1362,7 +1419,13 @@ OpenWrap.ch.prototype.getSet = function(aName, aMatch, aKey, aValue, aTimestamp,
 						return ii;
 					};
 				};
-				parent.jobs[aName][_i].then(f(_i));
+				parent.jobs[aName][_i].then(f(_i)).catch((e) => { 
+					ow.ch.__errorHandle({ 
+						chName: aName,
+						op: "set",
+						key: aKey
+					}, e);
+				});
 			}
 		}
 	}
@@ -1426,7 +1489,13 @@ OpenWrap.ch.prototype.unset = function(aName, aKey, aTimestamp, aUUID, x) {
 						return ii;
 					};
 				};
-				parent.jobs[aName][_i] = $do(f(_i));
+				parent.jobs[aName][_i] = $do(f(_i)).catch((e) => { 
+					ow.ch.__errorHandle({ 
+						chName: aName,
+						op: "unset",
+						key: aKey
+					}, e);
+				});
 			} else {				
 				var f = (ii) => {
 					return () => {
@@ -1434,7 +1503,13 @@ OpenWrap.ch.prototype.unset = function(aName, aKey, aTimestamp, aUUID, x) {
 						return ii;
 					};
 				};
-				parent.jobs[aName][_i].then(f(_i));
+				parent.jobs[aName][_i].then(f(_i)).catch((e) => { 
+					ow.ch.__errorHandle({ 
+						chName: aName,
+						op: "unset",
+						key: aKey
+					}, e);
+				});
 			}
 		}
 	}	
