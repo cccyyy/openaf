@@ -28,13 +28,13 @@
         $ch("_t1_").setAll(["filepath"], listFilesRecursive("..")); 
         $ch("_t1_").waitForJobs(); sleep(100);
 
-        ow.test.assert($ch("_t1_").size(), $ch("_t2_").size(), "Differences between channel 1 and 2");
-        ow.test.assert($ch("_t1_").size(), $ch("_t3_").size(), "Differences between channel 1 and 3");
+        ow.test.assert($ch("_t2_").size(), $ch("_t1_").size(), "Differences between channel 1 and 2");
+        ow.test.assert($ch("_t3_").size(), $ch("_t1_").size(), "Differences between channel 1 and 3");
 
         $ch("_t2_").subscribe(ow.ch.utils.getMirrorSubscriber("_t4_"));
         $ch("_t2_").waitForJobs(); sleep(100);
 
-        ow.test.assert($ch("_t2_").size(), $ch("_t4_").size(), "Differences between channel 2 and 4");
+        ow.test.assert($ch("_t4_").size(), $ch("_t2_").size(), "Differences between channel 2 and 4");
 
         $ch("_t1_").destroy();
         $ch("_t2_").destroy();
